@@ -1,6 +1,6 @@
 # Codes-of-Inter-RAT
 
-Official implementation of "Discovering Causal Rationales with Intervention".
+Official implementation of "Interventional Rationalization".
 
 To train Inter-RAT :
 ```
