@@ -1,6 +1,6 @@
 # Codes-of-Inter-RAT
 
-Official implementation of EMNLP-main'2023 paper  "Interventional Rationalization".
+Official implementation of EMNLP-main 2023 paper  "Interventional Rationalization".
 
 To train Inter-RAT :
 ```
