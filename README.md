@@ -24,3 +24,14 @@ python train.py \
   --abs=1 \
 
 ```
+
+## Citation
+```
+@inproceedings{yue2023interventional,
+  title={Interventional Rationalization},
+  author={Yue, Linan and Liu, Qi and Wang, Li and An, Yanqing and Du, Yichao and Huang, Zhenya},
+  booktitle={Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing},
+  pages={11404--11418},
+  year={2023}
+}
+```
