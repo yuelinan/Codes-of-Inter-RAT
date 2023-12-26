@@ -11,7 +11,7 @@ import numpy as np
 import torch
 import os
 import torch.nn as nn
-from utils import Data_Process,eval_data_types,make_kv_string
+from utils import Data_Process,eval_data_types,make_kv_string,Movie_Process
 from model import *
 from torch.utils.data import DataLoader,Dataset
 import torch.nn.functional as F
@@ -55,6 +55,8 @@ parser.add_argument('--min_lr', type=float, default=5e-5)
 parser.add_argument('--lr_decay', type=float, default=0.97)
 parser.add_argument('--abs', type=int, default=1)
 parser.add_argument('--times', type=int, default=1)
+parser.add_argument('--dataset_type', type=str, default='beer')
+
 args = parser.parse_args()
 
 logging.basicConfig(format = '%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
@@ -77,7 +79,10 @@ def random_seed():
 args.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 print(args.device)
-process = Data_Process(args)
+if args.dataset_type == 'beer':
+    process = Data_Process(args)
+else:
+    process = Movie_Process(args)
 # load data
 data_all = process.read_data(args.types)
 

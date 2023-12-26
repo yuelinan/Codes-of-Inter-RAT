@@ -62,6 +62,7 @@ class InterRAT(nn.Module):
         self.lab_embed_layer = self._create_label_embed_layer()
        
         self.Transformation_first = nn.Linear(self.lstm_hidden_dim , self.lstm_hidden_dim )
+        self.dataset_type = args.dataset_type
 
     def _create_label_embed_layer(self):
         embed_layer = nn.Embedding(self.num_labels, self.lstm_hidden_dim)
@@ -91,7 +92,11 @@ class InterRAT(nn.Module):
         A = torch.softmax(S,-1)
         
         A_split = torch.split(A, 1, dim=-1)
-        class_represention = 0.05 * torch.bmm(A_split[0], label_0) +  0.95 * torch.bmm(A_split[1], label_1)
+        if self.dataset_type == 'beer':
+            class_represention = 0.05 * torch.bmm(A_split[0], label_0) +  0.95 * torch.bmm(A_split[1], label_1)
+        else:
+            class_represention = 0.5 * torch.bmm(A_split[0], label_0) +  0.5 * torch.bmm(A_split[1], label_1)
+
         first_en_outputs_label = torch.cat([en_outputs,class_represention],dim=-1)
 
         z_logits = self.x_2_prob_z(first_en_outputs_label) 
@@ -117,8 +122,11 @@ class InterRAT(nn.Module):
        
 
         A_split = torch.split(A, 1, dim=-1)
-       
-        class_represention2 = 0.05 * torch.mm(A_split[0], label_0) +  0.95 * torch.mm(A_split[1], label_1)
+        if self.dataset_type == 'beer':
+            class_represention2 = 0.05 * torch.mm(A_split[0], label_0) +  0.95 * torch.mm(A_split[1], label_1)
+        else:
+            class_represention2 = 0.5 * torch.mm(A_split[0], label_0) +  0.5 * torch.mm(A_split[1], label_1)
+            
         second_en_outputs_label = torch.cat([s_w_feature,class_represention2],dim=-1)
 
 
