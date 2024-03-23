@@ -1,0 +1,17 @@
+python train_rnp_movie.py \
+  --gpu_id=0 \
+  --types=train \
+  --lr=0.001 \
+  --save_path=./output/ \
+  --is_emb=training \
+  --embed_dim=100 \
+  --batch_size=256 \
+  --epochs=20 \
+  --model_name=RNP \
+  --alpha_rationle=0.2 \
+  --lstm_hidden_dim=200 \
+  --infor_loss=0.02 \
+  --regular=0.01 \
+  --class_num=2 \
+  --seed=42 \
+  --abs=1 \
