@@ -37,6 +37,56 @@ class MaskGRU(nn.Module):
         return output
 
 
+class RNP(nn.Module):
+    def __init__(self,args, embedding):
+        super(RNP, self).__init__()
+        print('RNP')
+        self.embs = embedding
+
+        self.device = args.device
+        self.encoder = MaskGRU(args.embed_dim, args.lstm_hidden_dim//2,args.lstm_hidden_layer)
+        self.tanh = nn.Tanh()
+        self.softmax = nn.Softmax(dim = -1)
+        self.re_encoder = MaskGRU(args.embed_dim, args.lstm_hidden_dim//2,args.lstm_hidden_layer)
+        self.x_2_prob_z = nn.Sequential(
+            nn.Linear(args.lstm_hidden_dim, 2)
+          )
+        
+        self.ChargeClassifier = nn.Linear(args.lstm_hidden_dim, 2)
+        self.alpha_rationle = args.alpha_rationle
+
+    def forward(self, documents,sent_len):
+        eps = 1e-8
+        embed = self.embs(documents) # batch, seq_len, embed-dim
+        mask = torch.sign(documents).float()
+
+        batch_size = embed.size(0)
+        en_outputs = self.encoder([embed,sent_len.view(-1)])  # batch seq hid
+        z_logits = self.x_2_prob_z(en_outputs) # batch seq 2
+
+        sampled_seq = F.gumbel_softmax(z_logits,hard=True,dim=2)
+        sampled_seq = sampled_seq * mask.unsqueeze(2)
+
+        sampled_num = torch.sum(sampled_seq[:,:,1], dim = 1) # batch
+        sampled_num = (sampled_num == 0).to(self.device, dtype=torch.float32)  + sampled_num
+        sampled_word = embed * (sampled_seq[:,:,1].unsqueeze(2))  # batch seq hid
+       
+        s_w_feature = self.re_encoder([sampled_word,sent_len.view(-1)])
+
+        s_w_feature = torch.sum(s_w_feature, dim = 1)/ sampled_num.unsqueeze(1)# batch hid
+        self.final_output = s_w_feature
+        output = self.ChargeClassifier(s_w_feature) 
+
+        mask_number1 = sampled_seq[:,:,1]
+        # infor_loss = (mask_number1.sum(-1) / (sent_len+eps) ) - self.alpha_rationle
+        infor_loss = (mask_number1.sum(-1) / (mask.sum(1)+eps) ) - self.alpha_rationle
+        self.infor_loss = torch.abs(infor_loss).mean()
+        regular =  torch.abs(mask_number1[:,1:] - mask_number1[:,:-1]).sum(1) / (sent_len-1+eps)
+        self.regular = regular.mean()
+
+        return output , sampled_seq[:,:,1].unsqueeze(-1)
+
+
 
 class InterRAT(nn.Module):
     def __init__(self,args, embedding):
